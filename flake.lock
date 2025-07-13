@@ -2,23 +2,48 @@
   "nodes": {
     "ardrone-autonomy-flake": {
       "inputs": {
+        "ardronelib": "ardronelib",
         "nix-ros-overlay": "nix-ros-overlay",
         "nixpkgs": [
+          "nix-ros-overlay",
           "nixpkgs"
         ]
       },
       "locked": {
-        "lastModified": 1752255485,
-        "narHash": "sha256-oee89AruLf/u0hIkbS7BToDsnT1olhgMU8JKINMQnZs=",
-        "owner": "SCOTT-HAMILTON",
-        "repo": "ardrone_autonomy",
-        "rev": "a2ff3c09e7ad37ce1a7d6c7ca53f7ef28e3a0b6d",
-        "type": "github"
+        "lastModified": 1752487118,
+        "narHash": "sha256-jdEZvQX6D12UdJyTST815VXXYUu8jNKbVRAWgl4xLy8=",
+        "ref": "refs/heads/indigo-devel",
+        "rev": "16019c54785352420438c49dfeef87f0b8bfe708",
+        "revCount": 311,
+        "type": "git",
+        "url": "file:./ardrone_autonomy"
       },
       "original": {
-        "owner": "SCOTT-HAMILTON",
-        "repo": "ardrone_autonomy",
-        "type": "github"
+        "type": "git",
+        "url": "file:./ardrone_autonomy"
+      }
+    },
+    "ardronelib": {
+      "inputs": {
+        "flake-utils": "flake-utils",
+        "nixpkgs": [
+          "ardrone-autonomy-flake",
+          "nix-ros-overlay",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1752490174,
+        "narHash": "sha256-PaoF8iebZAqp8XHlEnnmCzz4k3ttFdf1pU26JR4PZYU=",
+        "ref": "refs/heads/master",
+        "rev": "11143e3076071b0b374b56b14377e9537b66f0f8",
+        "revCount": 23,
+        "type": "git",
+        "url": "file:./ardrone_autonomy/ardronelib"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:./ardrone_autonomy/ardronelib"
       }
     },
     "flake-utils": {
@@ -57,9 +82,27 @@
         "type": "github"
       }
     },
+    "flake-utils_3": {
+      "inputs": {
+        "systems": "systems_3"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "nix-ros-overlay": {
       "inputs": {
-        "flake-utils": "flake-utils",
+        "flake-utils": "flake-utils_2",
         "nixpkgs": "nixpkgs"
       },
       "locked": {
@@ -79,7 +122,7 @@
     },
     "nix-ros-overlay_2": {
       "inputs": {
-        "flake-utils": "flake-utils_2",
+        "flake-utils": "flake-utils_3",
         "nixpkgs": "nixpkgs_2"
       },
       "locked": {
@@ -155,6 +198,21 @@
       }
     },
     "systems_2": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_3": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",

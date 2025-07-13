@@ -4,8 +4,14 @@
     nixpkgs.follows = "nix-ros-overlay/nixpkgs";  # IMPORTANT!!!
     ardrone-autonomy-flake = {
       # url = "github:SCOTT-HAMILTON/ardrone_autonomy";
-      url = "git+file:./ardrone_autonomy";
-      inputs.nixpkgs.follows = "nixpkgs";  # Ensure consistent nixpkgs
+      url = "git+file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy";
+      inputs = {
+        nixpkgs.follows = "nix-ros-overlay/nixpkgs";  # Ensure consistent nixpkgs
+        ardronelib = {
+          url = "git+file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy/ardronelib";
+          inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";
+        };
+      };
     };
   };
   outputs = { self, nix-ros-overlay, ardrone-autonomy-flake, nixpkgs }:
