@@ -1,0 +1,3 @@
+[submodule "ardrone_autonomy"]
+	path = ardrone_autonomy
+	url = git@github.com:SCOTT-HAMILTON/ardrone_autonomy.git

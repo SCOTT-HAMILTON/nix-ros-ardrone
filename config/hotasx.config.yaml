@@ -1,0 +1,11 @@
+axis_linear:
+  x: 1   # Forward/Backward (Joystick Y-axis)
+  y: 0   # Left/Right (Joystick X-axis)
+  z: 2   # Up/Down (Throttle)
+axis_angular: 4
+scale_linear:
+  x: 0.5
+  y: 0.5
+  z: 0.5
+scale_angular: 0.5   # Rotation sensitivity
+enable_button: 0     # Trigger button (enable control)

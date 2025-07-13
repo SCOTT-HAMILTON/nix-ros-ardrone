@@ -1,0 +1,15 @@
+<launch>
+  <!-- Use ABSOLUTE PATH to your local config -->
+  <arg name="config_filepath" default="$(env HOME)/GIT/ros_ardrone/config/hotasx.config.yaml" />
+  <arg name="joy_dev" default="/dev/input/js0" />
+  
+  <node pkg="joy" type="joy_node" name="joy_node">
+    <param name="dev" value="$(arg joy_dev)" />
+    <param name="deadzone" value="0.15" />
+    <param name="autorepeat_rate" value="20" />
+  </node>
+
+  <node pkg="teleop_twist_joy" name="teleop_twist_joy" type="teleop_node">
+    <rosparam command="load" file="$(arg config_filepath)" />
+  </node>
+</launch>
