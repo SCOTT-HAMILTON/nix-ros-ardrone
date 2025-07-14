@@ -10,17 +10,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1752487118,
-        "narHash": "sha256-jdEZvQX6D12UdJyTST815VXXYUu8jNKbVRAWgl4xLy8=",
+        "lastModified": 1752492358,
+        "narHash": "sha256-eVSBgrprzvk04Seybty+7Zkn4VzWzK2J+i93ATwFBt8=",
         "ref": "refs/heads/indigo-devel",
-        "rev": "16019c54785352420438c49dfeef87f0b8bfe708",
-        "revCount": 311,
+        "rev": "2d2ab181ace0baa5c01083876bc7171a4b942eb8",
+        "revCount": 297,
         "type": "git",
-        "url": "file:./ardrone_autonomy"
+        "url": "file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy"
       },
       "original": {
         "type": "git",
-        "url": "file:./ardrone_autonomy"
+        "url": "file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy"
       }
     },
     "ardronelib": {
@@ -33,17 +33,17 @@
         ]
       },
       "locked": {
-        "lastModified": 1752490174,
-        "narHash": "sha256-PaoF8iebZAqp8XHlEnnmCzz4k3ttFdf1pU26JR4PZYU=",
+        "lastModified": 1752496812,
+        "narHash": "sha256-VNBI+Y9YwUxox8Qb10T3xuShlsyLPWfV6ErO/BQzEyw=",
         "ref": "refs/heads/master",
-        "rev": "11143e3076071b0b374b56b14377e9537b66f0f8",
-        "revCount": 23,
+        "rev": "52309779001574d9fd2340bd7352e2939b8ecd7c",
+        "revCount": 14,
         "type": "git",
-        "url": "file:./ardrone_autonomy/ardronelib"
+        "url": "file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy/ardronelib"
       },
       "original": {
         "type": "git",
-        "url": "file:./ardrone_autonomy/ardronelib"
+        "url": "file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy/ardronelib"
       }
     },
     "flake-utils": {

@@ -26,4 +26,24 @@ $ nix develop
 $ python joy.py
 ```
 
-You can now control the AR Drone with you joystick
+Now plotjuggler
+```shell_session
+$ rosrun plotjuggler plotjuggler
+```
+
+Now plotjuggler
+```shell_session
+$ rosrun plotjuggler plotjuggler
+```
+
+Front image viewer
+```shell_session
+$ rosrun rqt_image_view rqt_image_view /ardrone/front/image_raw
+```
+
+Bottom image viewer
+```shell_session
+$ rosrun rqt_image_view rqt_image_view /ardrone/bottom/image_raw
+```
+
+You can now control the AR Drone with you joystick and access all data provided by the drone

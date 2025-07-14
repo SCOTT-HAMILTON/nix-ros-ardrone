@@ -66,6 +66,7 @@
                 plotjuggler-msgs
                 plotjuggler-ros
                 teleop-twist-joy
+                rqt-image-view
                 # ardrone-tutorial
                 # ... other ROS packages
               ];
