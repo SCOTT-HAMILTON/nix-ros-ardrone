@@ -38,7 +38,7 @@ class HotasXController:
 
     def callback(self, joy):
         current_time = time.time() * 1000  # Get current time in milliseconds
-        print(f"Joy callback button3={joy.buttons[3]}, delta time={current_time - self.last_trigger_times['togglecam']} ms")
+        # print(f"Joy callback button3={joy.buttons[3]}, delta time={current_time - self.last_trigger_times['togglecam']} ms")
 
         # twist = Twist()
         # # # Custom mappings

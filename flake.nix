@@ -13,8 +13,12 @@
         };
       };
     };
+    camera-calibration-flake = {
+      url = "git+file:/home/scott/GIT/image_pipeline/camera_calibration";
+      inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";  # Ensure consistent nixpkgs
+    };
   };
-  outputs = { self, nix-ros-overlay, ardrone-autonomy-flake, nixpkgs }:
+  outputs = { self, nix-ros-overlay, ardrone-autonomy-flake, camera-calibration-flake, nixpkgs }:
     nix-ros-overlay.inputs.flake-utils.lib.eachDefaultSystem (system:
       let
         # The overlay logic from your first snippet
@@ -24,19 +28,32 @@
             rosDistro: rosPkgs: if rosPkgs ? overrideScope then rosPkgs.overrideScope rosOverlay else rosPkgs
             ) rosPackages;
 
-        rosOverlay = final: prev: {
-          ardrone-autonomy = ardrone-autonomy-flake.packages.${system}.default;
-        };
-
         rosDistroOverlays = final: prev: {
-          # Apply the overlay to the ROS packages from nix-ros-overlay
-          rosPackages = applyDistroOverlay (rosOverlay) prev.rosPackages;
+          rosPackages = applyDistroOverlay (rosFinal: rosPrev: rec {
+            cv-bridge = rosPrev.cv-bridge.overrideAttrs (old: {
+              buildInputs = (old.buildInputs or []) ++ [ final.opencv4 ];
+            });
+            ardrone-autonomy = ardrone-autonomy-flake.packages.${system}.default;
+            mycamera-calibration = camera-calibration-flake.packages.${system}.default.overrideAttrs (
+              old: {
+                propagatedBuildInputs =
+                  builtins.filter (pkg: (pkg.pname or "") != "ros-noetic-cv-bridge") (old.propagatedBuildInputs or [])
+                  ++ [ cv-bridge ];
+              }
+            );
+            rqt-image-view = rosPrev.rqt-image-view.overrideAttrs (old: {
+              buildInputs = pkgs.lib.traceValFn (x: builtins.concatStringsSep ", " (map (pkg: pkg.pname or "NO_PNAME") x)) ((builtins.filter (pkg: (pkg.pname or "") != "ros-noetic-cv-bridge") (old.buildInputs or [])) ++ [ cv-bridge ]);
+            });
+          }) prev.rosPackages;
         };
-
+        
+        opencvOverlay = self: super: {
+          opencv4 = super.opencv4.override { enableGtk3 = true; };
+        };
 
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [ nix-ros-overlay.overlays.default rosDistroOverlays ];
+          overlays = [  nix-ros-overlay.overlays.default rosDistroOverlays opencvOverlay ];
         };
       in {
         devShells.default = pkgs.mkShell {
@@ -54,6 +71,8 @@
               tqdm
               pyqt5
               pyqtgraph
+              distutils
+              opencv4
             ]))
             # ... other non-ROS packages
             (with pkgs.rosPackages.noetic; buildEnv {
@@ -67,7 +86,7 @@
                 plotjuggler-ros
                 teleop-twist-joy
                 rqt-image-view
-                # ardrone-tutorial
+                mycamera-calibration
                 # ... other ROS packages
               ];
             })

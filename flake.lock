@@ -10,10 +10,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1752492358,
+        "lastModified": 1752503458,
         "narHash": "sha256-eVSBgrprzvk04Seybty+7Zkn4VzWzK2J+i93ATwFBt8=",
         "ref": "refs/heads/indigo-devel",
-        "rev": "2d2ab181ace0baa5c01083876bc7171a4b942eb8",
+        "rev": "59ba9699f9195d82b35f5fd8af839334e8d04e2e",
         "revCount": 297,
         "type": "git",
         "url": "file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy"
@@ -33,10 +33,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1752496812,
-        "narHash": "sha256-VNBI+Y9YwUxox8Qb10T3xuShlsyLPWfV6ErO/BQzEyw=",
+        "lastModified": 1752503307,
+        "narHash": "sha256-XWCnG0sH3EhefM4PzDcdyB5lFPyqt6yuHaf8/VCT6KM=",
         "ref": "refs/heads/master",
-        "rev": "52309779001574d9fd2340bd7352e2939b8ecd7c",
+        "rev": "896297c8fb494e03956106eec249dd929351ffec",
         "revCount": 14,
         "type": "git",
         "url": "file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy/ardronelib"
@@ -44,6 +44,28 @@
       "original": {
         "type": "git",
         "url": "file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy/ardronelib"
+      }
+    },
+    "camera-calibration-flake": {
+      "inputs": {
+        "nix-ros-overlay": "nix-ros-overlay_2",
+        "nixpkgs": [
+          "nix-ros-overlay",
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1752613456,
+        "narHash": "sha256-jlyEM+cWrDdhmNM9KpoUFIyp1ffmYXSttm+P68d/S4A=",
+        "ref": "refs/heads/master",
+        "rev": "2ee9fa899a7eb1dc8e848e4dc03ba67ba593581f",
+        "revCount": 20,
+        "type": "git",
+        "url": "file:/home/scott/GIT/image_pipeline/camera_calibration"
+      },
+      "original": {
+        "type": "git",
+        "url": "file:/home/scott/GIT/image_pipeline/camera_calibration"
       }
     },
     "flake-utils": {
@@ -100,6 +122,24 @@
         "type": "github"
       }
     },
+    "flake-utils_4": {
+      "inputs": {
+        "systems": "systems_4"
+      },
+      "locked": {
+        "lastModified": 1731533236,
+        "narHash": "sha256-l0KFg5HjrsfsO/JpG+r7fRrqm12kzFHyUHqHCVpMMbI=",
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "rev": "11707dc2f618dd54ca8739b309ec4fc024de578b",
+        "type": "github"
+      },
+      "original": {
+        "owner": "numtide",
+        "repo": "flake-utils",
+        "type": "github"
+      }
+    },
     "nix-ros-overlay": {
       "inputs": {
         "flake-utils": "flake-utils_2",
@@ -124,6 +164,26 @@
       "inputs": {
         "flake-utils": "flake-utils_3",
         "nixpkgs": "nixpkgs_2"
+      },
+      "locked": {
+        "lastModified": 1744851421,
+        "narHash": "sha256-kXtMDUh/cCU05lnajBkD1qCuqnkKpMdD3B94P1P7UhE=",
+        "owner": "lopsided98",
+        "repo": "nix-ros-overlay",
+        "rev": "13bf45799fd80a2ea5356ff4a4b9a60434b1d217",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lopsided98",
+        "ref": "master",
+        "repo": "nix-ros-overlay",
+        "type": "github"
+      }
+    },
+    "nix-ros-overlay_3": {
+      "inputs": {
+        "flake-utils": "flake-utils_4",
+        "nixpkgs": "nixpkgs_3"
       },
       "locked": {
         "lastModified": 1744851421,
@@ -172,10 +232,27 @@
         "type": "github"
       }
     },
+    "nixpkgs_3": {
+      "locked": {
+        "lastModified": 1744849697,
+        "narHash": "sha256-S9hqvanPSeRu6R4cw0OhvH1rJ+4/s9xIban9C4ocM/0=",
+        "owner": "lopsided98",
+        "repo": "nixpkgs",
+        "rev": "6318f538166fef9f5118d8d78b9b43a04bb049e4",
+        "type": "github"
+      },
+      "original": {
+        "owner": "lopsided98",
+        "ref": "nix-ros",
+        "repo": "nixpkgs",
+        "type": "github"
+      }
+    },
     "root": {
       "inputs": {
         "ardrone-autonomy-flake": "ardrone-autonomy-flake",
-        "nix-ros-overlay": "nix-ros-overlay_2",
+        "camera-calibration-flake": "camera-calibration-flake",
+        "nix-ros-overlay": "nix-ros-overlay_3",
         "nixpkgs": [
           "nix-ros-overlay",
           "nixpkgs"
@@ -213,6 +290,21 @@
       }
     },
     "systems_3": {
+      "locked": {
+        "lastModified": 1681028828,
+        "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
+        "owner": "nix-systems",
+        "repo": "default",
+        "rev": "da67096a3b9bf56a91d16901293e51ba5b49a27e",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-systems",
+        "repo": "default",
+        "type": "github"
+      }
+    },
+    "systems_4": {
       "locked": {
         "lastModified": 1681028828,
         "narHash": "sha256-Vy1rq5AaRuLzOxct8nz4T6wlgyUR7zLU309k9mBC768=",
