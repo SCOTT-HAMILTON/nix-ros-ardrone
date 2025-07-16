@@ -12,15 +12,16 @@
       "locked": {
         "lastModified": 1752503458,
         "narHash": "sha256-eVSBgrprzvk04Seybty+7Zkn4VzWzK2J+i93ATwFBt8=",
-        "ref": "refs/heads/indigo-devel",
+        "owner": "SCOTT-HAMILTON",
+        "repo": "ardrone_autonomy",
         "rev": "59ba9699f9195d82b35f5fd8af839334e8d04e2e",
-        "revCount": 297,
-        "type": "git",
-        "url": "file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy"
+        "owner": "SCOTT-HAMILTON",
+        "ref": "indigo-devel",
+        "repo": "ardrone_autonomy",
+        "type": "github"
       }
     },
     "ardronelib": {
@@ -35,15 +36,16 @@
       "locked": {
         "lastModified": 1752503307,
         "narHash": "sha256-XWCnG0sH3EhefM4PzDcdyB5lFPyqt6yuHaf8/VCT6KM=",
-        "ref": "refs/heads/master",
+        "owner": "SCOTT-HAMILTON",
+        "repo": "ardronelib",
         "rev": "896297c8fb494e03956106eec249dd929351ffec",
-        "revCount": 14,
-        "type": "git",
-        "url": "file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy/ardronelib"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy/ardronelib"
+        "owner": "SCOTT-HAMILTON",
+        "ref": "master",
+        "repo": "ardronelib",
+        "type": "github"
       }
     },
     "camera-calibration-flake": {
@@ -55,17 +57,18 @@
         ]
       },
       "locked": {
-        "lastModified": 1752613456,
+        "lastModified": 1752673467,
         "narHash": "sha256-jlyEM+cWrDdhmNM9KpoUFIyp1ffmYXSttm+P68d/S4A=",
-        "ref": "refs/heads/master",
-        "rev": "2ee9fa899a7eb1dc8e848e4dc03ba67ba593581f",
-        "revCount": 20,
-        "type": "git",
-        "url": "file:/home/scott/GIT/image_pipeline/camera_calibration"
+        "owner": "SCOTT-HAMILTON",
+        "repo": "ros_camera_calibration",
+        "rev": "1952855f6b7f5015bc49816943e8fac1a5aeecf5",
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "file:/home/scott/GIT/image_pipeline/camera_calibration"
+        "owner": "SCOTT-HAMILTON",
+        "ref": "master",
+        "repo": "ros_camera_calibration",
+        "type": "github"
       }
     },
     "flake-utils": {

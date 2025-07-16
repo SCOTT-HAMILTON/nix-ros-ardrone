@@ -6,18 +6,20 @@
 
     ardrone-autonomy-flake = {
       # url = "github:SCOTT-HAMILTON/ardrone_autonomy";
-      url = "git+file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy";
+      url = "github:SCOTT-HAMILTON/ardrone_autonomy/indigo-devel";
       inputs = {
         nixpkgs.follows = "nix-ros-overlay/nixpkgs";  # Ensure consistent nixpkgs
         ardronelib = {
-          url = "git+file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy/ardronelib";
+          # url = "git+file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy/ardronelib";
+          url = "github:SCOTT-HAMILTON/ardronelib/master";
           inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";
         };
       };
     };
 
     camera-calibration-flake = {
-      url = "git+file:/home/scott/GIT/image_pipeline/camera_calibration";
+      # url = "git+file:/home/scott/GIT/image_pipeline/camera_calibration";
+      url = "github:SCOTT-HAMILTON/ros_camera_calibration/master";
       inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";  # Ensure consistent nixpkgs
     };
 
