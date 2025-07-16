@@ -1,0 +1,25 @@
+<package format="2">
+  <name>nix_ros_ardrone</name>
+  <version>0.0.0</version>
+  <description>
+    This package contains launch files and configurations for setting up the AR.Drone with various ROS components.
+  </description>
+  <maintainer email="votre_email@example.com">Votre Nom</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Runtime dependencies for the nodes and launch files used -->
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>std_msgs</depend>
+  <depend>ardrone_autonomy</depend>
+  <depend>teleop_twist_joy</depend>
+  <depend>foxglove_bridge</depend>
+  <depend>geometry_msgs</depend>
+
+  <!-- The export tag contains other, non-standard declarations. -->
+  <export>
+    <!-- Other tools can request additional information from this package here. -->
+  </export>
+</package>

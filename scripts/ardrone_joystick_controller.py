@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import rospy
 from sensor_msgs.msg import Joy
 from std_msgs.msg import Empty, String
@@ -7,7 +9,7 @@ import time
 
 class HotasXController:
     def __init__(self):
-        print("Initializing...")
+        rospy.loginfo("AR Drone joystick conroller Initializing...")
         self.pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.takeoff_pub = rospy.Publisher('/ardrone/takeoff', Empty, queue_size=1)
         self.land_pub = rospy.Publisher('/ardrone/land', Empty, queue_size=5)
@@ -21,20 +23,14 @@ class HotasXController:
         rospy.Subscriber('/joy', Joy, self.callback)
 
         rospy.wait_for_service('/ardrone/togglecam')
-        print("Ready !")
 
     def toggle_camera(self):
-        print("Lol toggle")
         try:
-            print("A")
             togglecam_service = rospy.ServiceProxy('/ardrone/togglecam', EmptySrv)
-            print("B")
             togglecam_service()
             rospy.loginfo("Camera toggled")
-            print("Camera toggled !")
         except Exception as e:
             rospy.logerr("Toggle cam Service call failed: %s", e)
-            print("Toggle cam Service call failed: %s", e)
 
     def callback(self, joy):
         current_time = time.time() * 1000  # Get current time in milliseconds
@@ -50,25 +46,29 @@ class HotasXController:
 
         if joy.buttons[1] and current_time - self.last_trigger_times['takeoff'] > 1000: # L1
             self.last_trigger_times['takeoff'] = current_time
-            print("Takeoff")
+            rospy.loginfo("Takeoff")
             self.takeoff_pub.publish(Empty())
         if joy.buttons[7] and current_time - self.last_trigger_times['land'] > 1000:  # X 6
             self.last_trigger_times['land'] = current_time
-            print("Land")
+            rospy.loginfo("Land")
             self.land_pub.publish(Empty())
         if joy.buttons[11] and current_time - self.last_trigger_times['reset'] > 1000:  # ST
             self.last_trigger_times['reset'] = current_time
-            print("Reset")
+            rospy.loginfo("Reset")
             self.reset_pub.publish(Empty())
         if joy.buttons[3] and current_time - self.last_trigger_times['togglecam'] > 1000:  # ST
-            print("Lol 1")
             self.last_trigger_times['togglecam'] = current_time
-            print("Lol 2")
             self.toggle_camera()
 
         # self.pub.publish(twist)
 
 if __name__ == '__main__':
-    rospy.init_node('hotasx_controller_buttons')
-    controller = HotasXController()
-    rospy.spin()
+    try:
+        rospy.init_node('ardrone_joystick_controller', anonymous=True)
+        controller = HotasXController()
+        rospy.loginfo("ARDrone Joystick Controller node started.")
+        rospy.spin()
+    except rospy.ROSInterruptException:
+        rospy.loginfo("ARDrone Joystick Controller node interrupted.")
+    except Exception as e:
+        rospy.logerr(f"An error occurred in ARDrone Joystick Controller: {e}")

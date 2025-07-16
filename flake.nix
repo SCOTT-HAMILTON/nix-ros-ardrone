@@ -1,7 +1,9 @@
 {
   inputs = {
     nix-ros-overlay.url = "github:lopsided98/nix-ros-overlay/master";
+
     nixpkgs.follows = "nix-ros-overlay/nixpkgs";  # IMPORTANT!!!
+
     ardrone-autonomy-flake = {
       # url = "github:SCOTT-HAMILTON/ardrone_autonomy";
       url = "git+file:/home/scott/GIT/nix-ros-ardrone/ardrone_autonomy";
@@ -13,12 +15,18 @@
         };
       };
     };
+
     camera-calibration-flake = {
       url = "git+file:/home/scott/GIT/image_pipeline/camera_calibration";
       inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";  # Ensure consistent nixpkgs
     };
+
+    ros-foxglove-bridge-flake = {
+      url = "github:SCOTT-HAMILTON/ros-foxglove-bridge";
+      inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";
+    };
   };
-  outputs = { self, nix-ros-overlay, ardrone-autonomy-flake, camera-calibration-flake, nixpkgs }:
+  outputs = { self, nix-ros-overlay, nixpkgs, ardrone-autonomy-flake, camera-calibration-flake, ros-foxglove-bridge-flake }:
     nix-ros-overlay.inputs.flake-utils.lib.eachDefaultSystem (system:
       let
         # The overlay logic from your first snippet
@@ -44,6 +52,10 @@
             rqt-image-view = rosPrev.rqt-image-view.overrideAttrs (old: {
               buildInputs = pkgs.lib.traceValFn (x: builtins.concatStringsSep ", " (map (pkg: pkg.pname or "NO_PNAME") x)) ((builtins.filter (pkg: (pkg.pname or "") != "ros-noetic-cv-bridge") (old.buildInputs or [])) ++ [ cv-bridge ]);
             });
+
+            ros-foxglove-bridge = ros-foxglove-bridge-flake.packages.${system}.default;
+
+            nix-ros-ardrone = rosFinal.callPackage ./package.nix {};
           }) prev.rosPackages;
         };
         
@@ -87,6 +99,8 @@
                 teleop-twist-joy
                 rqt-image-view
                 mycamera-calibration
+                ros-foxglove-bridge
+                nix-ros-ardrone
                 # ... other ROS packages
               ];
             })

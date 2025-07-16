@@ -31,9 +31,9 @@ Now plotjuggler
 $ rosrun plotjuggler plotjuggler
 ```
 
-Now plotjuggler
+Or foxglove
 ```shell_session
-$ rosrun plotjuggler plotjuggler
+$ roslaunch --screen foxglove_bridge launch/foxglove_bridge.launch port:=8765
 ```
 
 Front image viewer
@@ -47,3 +47,17 @@ $ rosrun rqt_image_view rqt_image_view /ardrone/bottom/image_raw
 ```
 
 You can now control the AR Drone with you joystick and access all data provided by the drone
+
+## Camera calibration
+
+For front camera
+```shell_session
+$ nix develop
+$ rosrun camera_calibration cameracalibrator.py --pattern=chessboard --square=0.0748 --size=8x6 image:=/ardrone/front/image_raw
+```
+
+For bottom camera
+```shell_session
+$ nix develop
+$ rosrun camera_calibration cameracalibrator.py --pattern=chessboard --square=0.0748 --size=8x6 image:=/ardrone/bottom/image_raw
+```
