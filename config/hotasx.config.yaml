@@ -4,8 +4,8 @@ axis_linear:
   z: 2   # Up/Down (Throttle)
 axis_angular: 4
 scale_linear:
-  x: 0.5
-  y: 0.5
-  z: 0.5
-scale_angular: 0.5   # Rotation sensitivity
+  x: 0.7
+  y: 0.7
+  z: 0.7
+scale_angular: 0.7   # Rotation sensitivity
 enable_button: 0     # Trigger button (enable control)

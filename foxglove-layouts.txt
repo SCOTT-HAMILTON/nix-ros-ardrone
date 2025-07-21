@@ -1,0 +1,37 @@
+# Linear Acceleration
+navdata/{ax, ay, az}
+imu/linear_acceleration/{x,y,z}
+
+# Velocity
+imu/angular_velocity/{x,y,z}
+navdata/{vx, vy, vz}
+
+# Orientation
+imu/orientation/pitch,roll,yaw
+odometry/pose/pose/orientation/{pitch, roll, yaw}
+navdata/{rotX, rotY, rotZ}
+navdata/{magX, magY, magZ}
+
+# Position
+odometry/pose/pose/position/{x, y, z}
+navdata/altd
+
+# Motors
+navdata/{motor1, motor2, motor3, motot4}
+
+# Pressure and temperature
+navdata/pressure
+navdata/temp
+
+# Tags count
+navdata/tagsCount
+
+# Wind
+navdata/wind_angle
+navdata/wind_comp_angle
+navdata/wind_speed
+
+
+
+
+

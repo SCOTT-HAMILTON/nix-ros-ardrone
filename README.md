@@ -61,3 +61,9 @@ For bottom camera
 $ nix develop
 $ rosrun camera_calibration cameracalibrator.py --pattern=chessboard --square=0.0748 --size=8x6 image:=/ardrone/bottom/image_raw
 ```
+
+## All-in-one
+
+```shell_session
+$ roslaunch nix_ros_ardrone ardrone_setup.launch
+```
