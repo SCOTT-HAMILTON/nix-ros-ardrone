@@ -186,7 +186,7 @@ class ROSPositionGUI:
         self.canvas.create_line(0, center_y, self.canvas_width, center_y,
                                 fill="black", width=2, tags="axes")
         # Label for Y-axis (at the right end, centered vertically on the line)
-        self.canvas.create_text(self.canvas_width - 10, center_y, text="Y", anchor="e", fill="black", tags="axes")
+        self.canvas.create_text(10, center_y, text="Y", anchor="w", fill="black", tags="axes")
 
         # Draw X-axis (vertical line through center_x)
         self.canvas.create_line(center_x, 0, center_x, self.canvas_height,
