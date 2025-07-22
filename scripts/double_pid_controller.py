@@ -210,6 +210,9 @@ class DronePidController:
             self.pid_vx = PID(Kp=self.shared_data.Kp, Ki=self.shared_data.Ki, Kd=self.shared_data.Kd,
                            output_limits=self.shared_data.pid_output_limits,
                            time_fn=rospy.get_time)
+            self.pid_vy = PID(Kp=self.shared_data.Kp, Ki=self.shared_data.Ki, Kd=self.shared_data.Kd,
+                           output_limits=self.shared_data.pid_output_limits,
+                           time_fn=rospy.get_time)
 
         # ROS subscribers and publishers
         self.navdata_sub = rospy.Subscriber('/ardrone/navdata', Navdata, self.navdata_callback)
@@ -280,6 +283,11 @@ class DronePidController:
             self.pid_vx.Kp = self.shared_data.Kp
             self.pid_vx.Ki = self.shared_data.Ki
             self.pid_vx.Kd = self.shared_data.Kd
+
+            self.pid_vy.Kp = self.shared_data.Kp
+            self.pid_vy.Ki = self.shared_data.Ki
+            self.pid_vy.Kd = self.shared_data.Kd
+
             manual_control = self.shared_data.manual_control
 
             target_z = self.shared_data.target_state.z
@@ -290,29 +298,41 @@ class DronePidController:
             target_vx = self.shared_data.target_state.vx
             current_vx = self.shared_data.current_state.vx
 
+            target_y = self.shared_data.target_state.y
+            current_y = self.shared_data.current_state.y
+            target_vy = self.shared_data.target_state.vy
+            current_vy = self.shared_data.current_state.vy
+
         twist = Twist()
         twist_scaled = Twist()
 
         if not manual_control:
-            self.pid_z.setpoint = target_z
-            cmd_z = self.pid_z(current_z)
-
             self.pid_vx.setpoint = target_vx
             cmd_x = self.pid_vx(current_vx)
 
+            self.pid_vy.setpoint = target_vy
+            cmd_y = self.pid_vy(current_vy)
+
+            self.pid_z.setpoint = target_z
+            cmd_z = self.pid_z(current_z)
+
             twist.linear.x = float(cmd_x)
+            twist.linear.y = float(cmd_y)
             twist.linear.z = float(cmd_z)
 
 
             twist_scaled.linear.x = float(cmd_x)*1000
+            twist_scaled.linear.y = float(cmd_y)*1000
             twist_scaled.linear.z = float(cmd_z)*1000
 
-            rospy.loginfo_throttle(1, f"Speed PID: Target={target_vx:.2f} m/s, Current={current_vx:.2f} mm/s, Command={float(cmd_x):.3f}")
+            rospy.loginfo_throttle(1, f"Speed vx PID: Target={target_vx:.2f} m/s, Current={current_vx:.2f} mm/s, Command={float(cmd_x):.3f}")
+            rospy.loginfo_throttle(1, f"Speed vy PID: Target={target_vy:.2f} m/s, Current={current_vy:.2f} mm/s, Command={float(cmd_y):.3f}")
             self.cmd_vel_pub.publish(twist)
             self.cmd_scaled_pub.publish(twist_scaled)
         else:
             rospy.loginfo_throttle(1, "Manual Control Mode: PID Reset.")
             self.pid_vx.reset()
+            self.pid_vy.reset()
             self.pid_z.reset()
 
 
@@ -326,9 +346,9 @@ if __name__ == '__main__':
 
     # --- Initialize shared data with default values BEFORE starting threads ---
     with shared_data.lock:
-        shared_data.Kp = 0.012
-        shared_data.Ki = 0.01
-        shared_data.Kd = 0.01
+        shared_data.Kp = 3.855e-4
+        shared_data.Ki = 2.627e-4
+        shared_data.Kd = 0.0
         shared_data.pid_output_limits = (-1.0, 1.0)
 
     # Start the GUI in its own thread, passing the event
