@@ -9,6 +9,7 @@
 
   <node pkg="nix_ros_ardrone" type="ardrone_joystick_controller.py" name="ardrone_joystick_controller" output="screen" />
   <node pkg="nix_ros_ardrone" type="double_pid_controller.py" name="double_pid_controller" output="screen" />
+  <node pkg="nix_ros_ardrone" type="pos_controller.py" name="pos_controller" output="screen" />
   <!-- <node pkg="nix_ros_ardrone" type="launch_chromium_foxglove.sh" name="launch_chromium_foxglove" respawn="false" output="screen" /> -->
 
   <include file="$(find foxglove_bridge)/launch/foxglove_bridge.launch">

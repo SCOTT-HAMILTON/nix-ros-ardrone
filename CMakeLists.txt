@@ -32,6 +32,9 @@ install(PROGRAMS scripts/pid_controller.py
 install(PROGRAMS scripts/double_pid_controller.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+install(PROGRAMS scripts/pos_controller.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 install(PROGRAMS scripts/launch_chromium_foxglove.sh
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

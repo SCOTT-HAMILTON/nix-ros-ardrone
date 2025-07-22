@@ -73,7 +73,7 @@ class GuiApp:
 
         # Kp
         ttk.Label(frame, text="Kp:").grid(row=0, column=0, sticky=tk.W)
-        self.kp_scale = ttk.Scale(frame, from_=0.0, to=0.002, orient=tk.HORIZONTAL,
+        self.kp_scale = ttk.Scale(frame, from_=0.0, to=7e-2, orient=tk.HORIZONTAL,
                                   command=self._update_pid_gains_from_gui,
                                   length=200)
         self.kp_scale.grid(row=0, column=1, sticky=(tk.W, tk.E))
@@ -82,7 +82,7 @@ class GuiApp:
 
         # Ki
         ttk.Label(frame, text="Ki:").grid(row=1, column=0, sticky=tk.W)
-        self.ki_scale = ttk.Scale(frame, from_=0.0, to=0.0004, orient=tk.HORIZONTAL,
+        self.ki_scale = ttk.Scale(frame, from_=0.0, to=2e-2, orient=tk.HORIZONTAL,
                                   command=self._update_pid_gains_from_gui,
                                   length=200)
         self.ki_scale.grid(row=1, column=1, sticky=(tk.W, tk.E))
@@ -204,15 +204,22 @@ class DronePidController:
         # Initialize PID controller with default gains and output limits
         # These are set in __main__ before threads start, so we just read them.
         with self.shared_data.lock:
+            self.pid_vx = PID(Kp=3.855e-4, Ki=2.627e-4, Kd=0.0,
+                           output_limits=self.shared_data.pid_output_limits,
+                           time_fn=rospy.get_time)
+            self.pid_vy = PID(Kp=3.855e-4, Ki=2.627e-4, Kd=0.0,
+                           output_limits=self.shared_data.pid_output_limits,
+                           time_fn=rospy.get_time)
+            self.pid_x = PID(Kp=self.shared_data.Kp, Ki=self.shared_data.Ki, Kd=self.shared_data.Kd,
+                           output_limits=(-600, 600),
+                           time_fn=rospy.get_time)
+            self.pid_y = PID(Kp=self.shared_data.Kp, Ki=self.shared_data.Ki, Kd=self.shared_data.Kd,
+                           output_limits=(-600, 600),
+                           time_fn=rospy.get_time)
             self.pid_z = PID(Kp=0.012, Ki=0.010, Kd=0.007,
                            output_limits=self.shared_data.pid_output_limits,
                            time_fn=rospy.get_time)
-            self.pid_vx = PID(Kp=self.shared_data.Kp, Ki=self.shared_data.Ki, Kd=self.shared_data.Kd,
-                           output_limits=self.shared_data.pid_output_limits,
-                           time_fn=rospy.get_time)
-            self.pid_vy = PID(Kp=self.shared_data.Kp, Ki=self.shared_data.Ki, Kd=self.shared_data.Kd,
-                           output_limits=self.shared_data.pid_output_limits,
-                           time_fn=rospy.get_time)
+
 
         # ROS subscribers and publishers
         self.navdata_sub = rospy.Subscriber('/ardrone/navdata', Navdata, self.navdata_callback)
@@ -221,10 +228,20 @@ class DronePidController:
         self.cmd_vel_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
         self.cmd_scaled_pub = rospy.Publisher('/cmd_vel_scaled', Twist, queue_size=1)
 
+        self.cmd_pos_sub = rospy.Subscriber('/cmd_pos', Twist, self.cmd_pos_callback)
+
         # Set up a ROS Timer for the control loop
         self.control_timer = rospy.Timer(rospy.Duration(1.0/50.0), self.control_loop_timer_callback)
 
         rospy.loginfo("Drone PID Controller ROS components initialized.")
+
+    def cmd_pos_callback(self, data):
+        if rospy.is_shutdown():
+            rospy.loginfo("ROS is shutting down, skipping control loop.")
+            return # Exit early if ROS is shutting down
+        with self.shared_data.lock:
+            self.shared_data.target_state.x = data.linear.x
+            self.shared_data.target_state.y = data.linear.y
 
     def navdata_callback(self, data):
         """Update current altitude measurement and share with GUI."""
@@ -266,8 +283,6 @@ class DronePidController:
                 elif data.buttons[8] == 0 and self.button_toggle_alt_source_pressed:
                     self.button_toggle_alt_source_pressed = False
 
-            if len(data.axes) > 1:
-                self.shared_data.target_state.x = int(data.axes[1] * 1000)
             if len(data.axes) > 2:
                 self.shared_data.target_state.z = int((data.axes[2]+1) * 1000)
 
@@ -280,13 +295,13 @@ class DronePidController:
 
         # Get latest PID gains and control variables from shared data
         with self.shared_data.lock:
-            self.pid_vx.Kp = self.shared_data.Kp
-            self.pid_vx.Ki = self.shared_data.Ki
-            self.pid_vx.Kd = self.shared_data.Kd
+            self.pid_x.Kp = self.shared_data.Kp
+            self.pid_x.Ki = self.shared_data.Ki
+            self.pid_x.Kd = self.shared_data.Kd
 
-            self.pid_vy.Kp = self.shared_data.Kp
-            self.pid_vy.Ki = self.shared_data.Ki
-            self.pid_vy.Kd = self.shared_data.Kd
+            self.pid_y.Kp = self.shared_data.Kp
+            self.pid_y.Ki = self.shared_data.Ki
+            self.pid_y.Kd = self.shared_data.Kd
 
             manual_control = self.shared_data.manual_control
 
@@ -307,10 +322,16 @@ class DronePidController:
         twist_scaled = Twist()
 
         if not manual_control:
-            self.pid_vx.setpoint = target_vx
+            self.pid_x.setpoint = target_x
+            cmd_vx = self.pid_x(current_x)
+
+            self.pid_vx.setpoint = cmd_vx
             cmd_x = self.pid_vx(current_vx)
 
-            self.pid_vy.setpoint = target_vy
+            self.pid_y.setpoint = target_y
+            cmd_vy = self.pid_y(current_y)
+
+            self.pid_vy.setpoint = cmd_vy
             cmd_y = self.pid_vy(current_vy)
 
             self.pid_z.setpoint = target_z
@@ -329,6 +350,8 @@ class DronePidController:
             rospy.loginfo_throttle(1, f"Speed vy PID: Target={target_vy:.2f} m/s, Current={current_vy:.2f} mm/s, Command={float(cmd_y):.3f}")
             self.cmd_vel_pub.publish(twist)
             self.cmd_scaled_pub.publish(twist_scaled)
+            with self.shared_data.lock:
+                self.shared_data.target_state.vx = cmd_vx
         else:
             rospy.loginfo_throttle(1, "Manual Control Mode: PID Reset.")
             self.pid_vx.reset()
@@ -346,8 +369,8 @@ if __name__ == '__main__':
 
     # --- Initialize shared data with default values BEFORE starting threads ---
     with shared_data.lock:
-        shared_data.Kp = 3.855e-4
-        shared_data.Ki = 2.627e-4
+        shared_data.Kp = 3.855e-2
+        shared_data.Ki = 2e-2
         shared_data.Kd = 0.0
         shared_data.pid_output_limits = (-1.0, 1.0)
 
