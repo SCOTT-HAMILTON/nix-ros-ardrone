@@ -26,11 +26,12 @@ catkin_package(
 install(PROGRAMS scripts/ardrone_joystick_controller.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
 install(PROGRAMS scripts/pid_controller.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
-
+install(PROGRAMS scripts/double_pid_controller.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 install(PROGRAMS scripts/launch_chromium_foxglove.sh
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

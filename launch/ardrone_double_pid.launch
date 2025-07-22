@@ -1,0 +1,18 @@
+<launch>
+  <node pkg="ardrone_autonomy" type="ardrone_driver" name="ardrone_driver" output="screen">
+    <param name="realtime_navdata" value="True" />
+    <param name="navdata_demo" value="0" />
+    <param name="ip" value="192.168.1.1" />
+  </node>
+
+  <include file="$(find nix_ros_ardrone)/launch/hotasx_teleop.launch" />
+
+  <node pkg="nix_ros_ardrone" type="ardrone_joystick_controller.py" name="ardrone_joystick_controller" output="screen" />
+  <node pkg="nix_ros_ardrone" type="double_pid_controller.py" name="double_pid_controller" output="screen" />
+  <!-- <node pkg="nix_ros_ardrone" type="launch_chromium_foxglove.sh" name="launch_chromium_foxglove" respawn="false" output="screen" /> -->
+
+  <include file="$(find foxglove_bridge)/launch/foxglove_bridge.launch">
+    <arg name="port" value="8765" />
+  </include>
+
+</launch>
