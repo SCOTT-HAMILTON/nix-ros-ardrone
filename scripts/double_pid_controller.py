@@ -263,8 +263,8 @@ class DronePidController:
 
         with self.shared_data.lock:
             # Odometry pos is usually in meters, convert to mm for consistency
-            self.shared_data.current_state.x = data.pose.pose.position.x
-            self.shared_data.current_state.y = data.pose.pose.position.y
+            self.shared_data.current_state.x = data.pose.pose.position.x*1000
+            self.shared_data.current_state.y = data.pose.pose.position.y*1000
             # self.shared_data.current_state.z = data.pose.pose.position.z
 
     def joy_callback(self, data):
