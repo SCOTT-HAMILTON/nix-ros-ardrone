@@ -9,8 +9,8 @@ import queue
 import threading
 
 # Define the ROS coordinate limits
-ROS_MIN_COORD = -1000.0
-ROS_MAX_COORD = 1000.0
+ROS_MIN_COORD = -3000.0
+ROS_MAX_COORD = 3000.0
 ROS_RANGE = ROS_MAX_COORD - ROS_MIN_COORD
 
 class ROSPositionGUI:
