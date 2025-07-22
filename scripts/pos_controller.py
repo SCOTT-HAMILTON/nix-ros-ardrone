@@ -71,10 +71,9 @@ class ROSPositionGUI:
         if rospy.is_shutdown():
             return
 
-        with self.shared_data.lock:
-            # Odometry pos is usually in meters, convert to mm for consistency
-            self.odometry_x = data.pose.pose.position.x*1000
-            self.odometry_y = data.pose.pose.position.y*1000
+        # Odometry pos is usually in meters, convert to mm for consistency
+        self.odometry_x = data.pose.pose.position.x*1000
+        self.odometry_y = data.pose.pose.position.y*1000
 
     def _create_widgets(self):
         # Input Frame
