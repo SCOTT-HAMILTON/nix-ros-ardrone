@@ -346,8 +346,8 @@ class DronePidController:
             twist_scaled.linear.y = float(cmd_y)*1000
             twist_scaled.linear.z = float(cmd_z)*1000
 
-            twist_scaled.angular.x = float(cmd_vx)*1000
-            twist_scaled.angular.y = float(cmd_vy)*1000
+            twist_scaled.angular.x = float(cmd_vx)
+            twist_scaled.angular.y = float(cmd_vy)
 
             rospy.loginfo_throttle(1, f"Speed vx PID: Target={target_vx:.2f} m/s, Current={current_vx:.2f} mm/s, Command={float(cmd_x):.3f}")
             rospy.loginfo_throttle(1, f"Speed vy PID: Target={target_vy:.2f} m/s, Current={current_vy:.2f} mm/s, Command={float(cmd_y):.3f}")
