@@ -22,6 +22,9 @@ class ROSPositionGUI:
         try:
             rospy.init_node('position_publisher_gui_node', anonymous=True)
             self.publisher = rospy.Publisher('/cmd_pos', Twist, queue_size=10)
+            self.odometry_sub = rospy.Subscriber('/ardrone/odometry', Odometry, self.odometry_callback)
+            self.odometry_x = 0
+            self.odometry_y = 0
             rospy.loginfo("ROS node 'position_publisher_gui_node' initialized.")
             rospy.loginfo("Publisher created for topic '/cmd_pos'.")
 
@@ -61,6 +64,17 @@ class ROSPositionGUI:
         # Handle window closing
         master.protocol("WM_DELETE_WINDOW", self._on_close)
 
+
+    def odometry_callback(self, data):
+        """Update current altitude measurement from odometry."""
+        if rospy.is_shutdown():
+            return
+
+        with self.shared_data.lock:
+            # Odometry pos is usually in meters, convert to mm for consistency
+            self.odometry_x = data.pose.pose.position.x*1000
+            self.odometry_y = data.pose.pose.position.y*1000
+
     def _create_widgets(self):
         # Input Frame
         input_frame = ttk.LabelFrame(self.master, text="Current Target Position", padding="10 10")
@@ -76,6 +90,11 @@ class ROSPositionGUI:
         self.y_entry = ttk.Entry(input_frame, width=20, state='readonly')
         self.y_entry.insert(0, str(self.current_y))
         self.y_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
+
+        # Add the Reset button
+        reset_button = ttk.Button(input_frame, text="Reset to (0,0)", command=self._reset_position)
+        reset_button.grid(row=0, column=2, rowspan=2, padx=10, pady=5, sticky="nsew")
+
 
         input_frame.grid_columnconfigure(1, weight=1) # Allow entry fields to expand
 
@@ -211,6 +230,22 @@ class ROSPositionGUI:
         # Directly call update_target which also publishes
         self.update_target(ros_x, ros_y)
         self._show_message("Success", f"Target set to ({ros_x:.1f}, {ros_y:.1f}) via canvas click and Twist message published.", "green")
+
+    def _reset_position(self):
+        """Resets the target position to odometry and publishes."""
+        new_x = self.odometry_x
+        new_y = self.odometry_y
+        self.x_entry.config(state='normal')
+        self.y_entry.config(state='normal')
+        self.x_entry.delete(0, tk.END)
+        self.x_entry.insert(0, f"{new_x:.2f}")
+        self.y_entry.delete(0, tk.END)
+        self.y_entry.insert(0, f"{new_y:.2f}")
+        self.x_entry.config(state='readonly')
+        self.y_entry.config(state='readonly')
+
+        self.update_target(new_x, new_)
+        self._show_message("Success", f"Position reset to ({new_x:.2f}, {new_y:.2f}) and Twist message published.", "green")
 
 
     def _periodic_publish(self, event):
