@@ -9,8 +9,8 @@ import queue
 import threading
 
 # Define the ROS coordinate limits
-ROS_MIN_COORD = -3000.0
-ROS_MAX_COORD = 3000.0
+ROS_MIN_COORD = -1000.0
+ROS_MAX_COORD = 1000.0
 ROS_RANGE = ROS_MAX_COORD - ROS_MIN_COORD
 
 class ROSPositionGUI:
@@ -23,7 +23,7 @@ class ROSPositionGUI:
         try:
             rospy.init_node('position_publisher_gui_node', anonymous=True)
             self.publisher = rospy.Publisher('/cmd_pos', Twist, queue_size=10)
-            # Subscribe to odometry topic to get current position for reset
+            # Subscribe to odometry topic to get current position for reset and visualization
             self.odometry_sub = rospy.Subscriber('/ardrone/odometry', Odometry, self.odometry_callback)
             self.odometry_x = 0.0 # Initialize odometry x
             self.odometry_y = 0.0 # Initialize odometry y
@@ -52,7 +52,8 @@ class ROSPositionGUI:
 
         self.current_x = 0.0
         self.current_y = 0.0
-        self.target_point_id = None # To store the canvas item ID for the target point
+        self.target_point_id = None # To store the canvas item ID for the target point (red)
+        self.odometry_point_id = None # To store the canvas item ID for the odometry point (green)
 
         # Queue for thread-safe GUI updates
         self.gui_update_queue = queue.Queue()
@@ -60,7 +61,8 @@ class ROSPositionGUI:
         self._create_widgets()
         self._draw_grid()
         self._draw_axes()
-        self._draw_target_point()
+        self._draw_target_point() # Draw initial target point
+        self._draw_odometry_point() # Draw initial odometry point
 
         # Start a periodic check for GUI updates from the queue
         self.master.after(100, self._process_gui_queue)
@@ -76,6 +78,10 @@ class ROSPositionGUI:
         # Odometry pos is usually in meters, convert to mm for consistency
         self.odometry_x = data.pose.pose.position.x * 1000
         self.odometry_y = data.pose.pose.position.y * 1000
+
+        # Schedule GUI update for odometry point on the main Tkinter thread
+        self.gui_update_queue.put(('odometry_update', self.odometry_x, self.odometry_y))
+
 
     def _create_widgets(self):
         # Input Frame
@@ -186,7 +192,7 @@ class ROSPositionGUI:
         self.canvas.create_line(0, center_y, self.canvas_width, center_y,
                                 fill="black", width=2, tags="axes")
         # Label for Y-axis (at the right end, centered vertically on the line)
-        self.canvas.create_text(10, center_y, text="Y", anchor="w", fill="black", tags="axes")
+        self.canvas.create_text(self.canvas_width - 10, center_y, text="Y", anchor="e", fill="black", tags="axes")
 
         # Draw X-axis (vertical line through center_x)
         self.canvas.create_line(center_x, 0, center_x, self.canvas_height,
@@ -201,6 +207,7 @@ class ROSPositionGUI:
         # Delete previous target point if it exists
         if self.target_point_id:
             self.canvas.delete(self.target_point_id)
+            self.canvas.delete("target_label") # Delete old label
 
         # Convert current ROS coordinates to canvas coordinates
         canvas_x, canvas_y = self._ros_to_canvas(self.current_x, self.current_y)
@@ -218,6 +225,30 @@ class ROSPositionGUI:
                                 fill="red", tags="target_label")
         self.canvas.tag_raise(self.target_point_id) # Ensure point is on top
         self.canvas.tag_raise("target_label") # Ensure label is on top
+
+    def _draw_odometry_point(self):
+        # Delete previous odometry point if it exists
+        if self.odometry_point_id:
+            self.canvas.delete(self.odometry_point_id)
+            self.canvas.delete("odometry_label") # Delete old label
+
+        # Convert odometry ROS coordinates to canvas coordinates
+        canvas_x, canvas_y = self._ros_to_canvas(self.odometry_x, self.odometry_y)
+
+        # Draw the new odometry point (a small circle)
+        point_radius = 5
+        self.odometry_point_id = self.canvas.create_oval(
+            canvas_x - point_radius, canvas_y - point_radius,
+            canvas_x + point_radius, canvas_y + point_radius,
+            fill="lime green", outline="darkgreen"
+        )
+        # Add text label for the point
+        self.canvas.create_text(canvas_x, canvas_y + 15, # Position label below the point
+                                text=f"({self.odometry_x:.1f}, {self.odometry_y:.1f})",
+                                fill="darkgreen", tags="odometry_label")
+        self.canvas.tag_raise(self.odometry_point_id) # Ensure point is on top
+        self.canvas.tag_raise("odometry_label") # Ensure label is on top
+
 
     def _on_canvas_click(self, event):
         """Callback when canvas is clicked to set a new target."""
@@ -305,9 +336,8 @@ class ROSPositionGUI:
             self._show_message("ROS Warning", "ROS not connected. Message not published.", "orange")
 
 
-        # Schedule GUI update on the main Tkinter thread
-        # This is crucial for thread safety.
-        self.gui_update_queue.put((x, y))
+        # Schedule GUI update for target point on the main Tkinter thread
+        self.gui_update_queue.put(('target_update', x, y))
 
     def _process_gui_queue(self):
         """
@@ -316,14 +346,16 @@ class ROSPositionGUI:
         """
         try:
             while True:
-                # Get the latest target from the queue without blocking
-                x, y = self.gui_update_queue.get_nowait()
-                # Update internal state (already done in update_target, but re-confirm for GUI)
-                self.current_x = x
-                self.current_y = y
-                # Redraw the point on the canvas
-                self.canvas.delete("target_label") # Delete old label
-                self._draw_target_point()
+                # Get the latest update from the queue without blocking
+                update_type, x, y = self.gui_update_queue.get_nowait()
+                if update_type == 'target_update':
+                    self.current_x = x
+                    self.current_y = y
+                    self._draw_target_point()
+                elif update_type == 'odometry_update':
+                    self.odometry_x = x
+                    self.odometry_y = y
+                    self._draw_odometry_point()
         except queue.Empty:
             pass # No updates in the queue
         finally:
