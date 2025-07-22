@@ -263,8 +263,8 @@ class DronePidController:
 
         with self.shared_data.lock:
             # Odometry pos is usually in meters, convert to mm for consistency
-            self.shared_data.current_state.x = data.pose.pose.position.x
-            self.shared_data.current_state.y = data.pose.pose.position.y
+            self.shared_data.current_state.x = data.pose.pose.position.x*1000
+            self.shared_data.current_state.y = data.pose.pose.position.y*1000
             # self.shared_data.current_state.z = data.pose.pose.position.z
 
     def joy_callback(self, data):
@@ -346,8 +346,11 @@ class DronePidController:
             twist_scaled.linear.y = float(cmd_y)*1000
             twist_scaled.linear.z = float(cmd_z)*1000
 
+            twist_scaled.angular.x = float(cmd_vx)
+            twist_scaled.angular.y = float(cmd_vy)
+
+            rospy.loginfo_throttle(1, f"Pos x PID: Target={target_x:.2f} mm, Current={current_x:.2f} mm, Command={float(cmd_vx):.3f}")
             rospy.loginfo_throttle(1, f"Speed vx PID: Target={target_vx:.2f} m/s, Current={current_vx:.2f} mm/s, Command={float(cmd_x):.3f}")
-            rospy.loginfo_throttle(1, f"Speed vy PID: Target={target_vy:.2f} m/s, Current={current_vy:.2f} mm/s, Command={float(cmd_y):.3f}")
             self.cmd_vel_pub.publish(twist)
             self.cmd_scaled_pub.publish(twist_scaled)
             with self.shared_data.lock:
