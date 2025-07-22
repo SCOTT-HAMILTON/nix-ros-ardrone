@@ -3,14 +3,14 @@
 import tkinter as tk
 from tkinter import ttk
 import rospy
-from nav_msgs.msg import Odometry
+from nav_msgs.msg import Odometry # Import Odometry message type
 from geometry_msgs.msg import Twist
 import queue
 import threading
 
 # Define the ROS coordinate limits
-ROS_MIN_COORD = -3000.0
-ROS_MAX_COORD = 3000.0
+ROS_MIN_COORD = -1000.0
+ROS_MAX_COORD = 1000.0
 ROS_RANGE = ROS_MAX_COORD - ROS_MIN_COORD
 
 class ROSPositionGUI:
@@ -23,11 +23,14 @@ class ROSPositionGUI:
         try:
             rospy.init_node('position_publisher_gui_node', anonymous=True)
             self.publisher = rospy.Publisher('/cmd_pos', Twist, queue_size=10)
+            # Subscribe to odometry topic to get current position for reset
             self.odometry_sub = rospy.Subscriber('/ardrone/odometry', Odometry, self.odometry_callback)
-            self.odometry_x = 0
-            self.odometry_y = 0
+            self.odometry_x = 0.0 # Initialize odometry x
+            self.odometry_y = 0.0 # Initialize odometry y
             rospy.loginfo("ROS node 'position_publisher_gui_node' initialized.")
             rospy.loginfo("Publisher created for topic '/cmd_pos'.")
+            rospy.loginfo("Subscriber created for topic '/ardrone/odometry'.")
+
 
             # Start rospy.spin() in a separate thread to handle ROS callbacks
             # This allows the Tkinter main loop to run without being blocked by ROS
@@ -65,15 +68,14 @@ class ROSPositionGUI:
         # Handle window closing
         master.protocol("WM_DELETE_WINDOW", self._on_close)
 
-
     def odometry_callback(self, data):
-        """Update current altitude measurement from odometry."""
+        """Update current position measurement from odometry."""
         if rospy.is_shutdown():
             return
 
         # Odometry pos is usually in meters, convert to mm for consistency
-        self.odometry_x = data.pose.pose.position.x*1000
-        self.odometry_y = data.pose.pose.position.y*1000
+        self.odometry_x = data.pose.pose.position.x * 1000
+        self.odometry_y = data.pose.pose.position.y * 1000
 
     def _create_widgets(self):
         # Input Frame
@@ -92,7 +94,7 @@ class ROSPositionGUI:
         self.y_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
 
         # Add the Reset button
-        reset_button = ttk.Button(input_frame, text="Reset to odometry", command=self._reset_position)
+        reset_button = ttk.Button(input_frame, text="Reset to Odometry", command=self._reset_position)
         reset_button.grid(row=0, column=2, rowspan=2, padx=10, pady=5, sticky="nsew")
 
 
@@ -121,69 +123,76 @@ class ROSPositionGUI:
     def _ros_to_canvas(self, ros_x, ros_y):
         """
         Converts ROS coordinates [-1000, 1000] to canvas pixel coordinates.
-        X-axis is vertical, Y-axis is horizontal.
+        X-axis is vertical (positive up), Y-axis is horizontal (positive left).
         """
-        # Scale factor for X and Y
-        scale_x = self.canvas_width / ROS_RANGE
-        scale_y = self.canvas_height / ROS_RANGE
+        # Scale factors for mapping ROS range to canvas dimensions
+        scale_x_to_canvas_y = self.canvas_height / ROS_RANGE
+        scale_y_to_canvas_x = self.canvas_width / ROS_RANGE
 
-        # ROS X maps to Canvas Y (inverted)
-        canvas_y = self.canvas_height - ((ros_x - ROS_MIN_COORD) * scale_x)
-        # ROS Y maps to Canvas X
-        canvas_x = (ros_y - ROS_MIN_COORD) * scale_y
+        # ROS X (vertical) maps to Canvas Y (inverted: positive ROS X is up, so smaller canvas Y)
+        canvas_y = self.canvas_height - ((ros_x - ROS_MIN_COORD) * scale_x_to_canvas_y)
+        # ROS Y (horizontal) maps to Canvas X (inverted: positive ROS Y is left, so smaller canvas X)
+        canvas_x = self.canvas_width - ((ros_y - ROS_MIN_COORD) * scale_y_to_canvas_x)
         return canvas_x, canvas_y
 
     def _canvas_to_ros(self, canvas_x, canvas_y):
         """
         Converts canvas pixel coordinates to ROS coordinates [-1000, 1000].
-        X-axis is vertical, Y-axis is horizontal.
+        X-axis is vertical (positive up), Y-axis is horizontal (positive left).
         """
-        scale_x = ROS_RANGE / self.canvas_width
-        scale_y = ROS_RANGE / self.canvas_height
+        # Scale factors for mapping canvas dimensions to ROS range
+        scale_canvas_y_to_ros_x = ROS_RANGE / self.canvas_height
+        scale_canvas_x_to_ros_y = ROS_RANGE / self.canvas_width
 
         # Canvas Y (inverted) maps to ROS X
-        ros_x = ((self.canvas_height - canvas_y) * scale_x) + ROS_MIN_COORD
-        # Canvas X maps to ROS Y
-        ros_y = (canvas_x * scale_y) + ROS_MIN_COORD
+        ros_x = ((self.canvas_height - canvas_y) * scale_canvas_y_to_ros_x) + ROS_MIN_COORD
+        # Canvas X (inverted) maps to ROS Y
+        ros_y = ((self.canvas_width - canvas_x) * scale_canvas_x_to_ros_y) + ROS_MIN_COORD
         return ros_x, ros_y
 
     def _draw_grid(self):
         # Clear existing grid lines (if any)
         self.canvas.delete("grid_line")
 
-        # Draw horizontal grid lines (corresponding to ROS Y values)
+        # Draw horizontal grid lines (for ROS Y values - these are vertical lines on canvas)
         for i in range(int(ROS_MIN_COORD), int(ROS_MAX_COORD) + 1, 100):
             if i == 0: continue # Skip 0, will be drawn as axis
-            canvas_x = self._ros_to_canvas(0, i)[0] # Use Y for canvas X
-            self.canvas.create_line(canvas_x, 0, canvas_x, self.canvas_height,
+            canvas_x_pos = self._ros_to_canvas(0, i)[0] # Get canvas X for this ROS Y
+            self.canvas.create_line(canvas_x_pos, 0, canvas_x_pos, self.canvas_height,
                                     fill="#e0e0e0", tags="grid_line")
-            self.canvas.create_text(canvas_x, self._ros_to_canvas(ROS_MIN_COORD, i)[1] - 20, # Text above line
-                                    text=str(i), anchor="n", fill="#888888", tags="grid_line")
+            # Label for Y-axis grid lines (at the bottom of the canvas)
+            self.canvas.create_text(canvas_x_pos, self.canvas_height - 10,
+                                    text=str(i), anchor="s", fill="#888888", tags="grid_line")
 
-        # Draw vertical grid lines (corresponding to ROS X values)
+        # Draw vertical grid lines (for ROS X values - these are horizontal lines on canvas)
         for i in range(int(ROS_MIN_COORD), int(ROS_MAX_COORD) + 1, 100):
             if i == 0: continue # Skip 0, will be drawn as axis
-            canvas_y = self._ros_to_canvas(i, 0)[1] # Use X for canvas Y
-            self.canvas.create_line(0, canvas_y, self.canvas_width, canvas_y,
+            canvas_y_pos = self._ros_to_canvas(i, 0)[1] # Get canvas Y for this ROS X
+            self.canvas.create_line(0, canvas_y_pos, self.canvas_width, canvas_y_pos,
                                     fill="#e0e0e0", tags="grid_line")
-            self.canvas.create_text(self._ros_to_canvas(i, ROS_MIN_COORD)[0] + 20, canvas_y, # Text to the right
-                                    text=str(i), anchor="e", fill="#888888", tags="grid_line")
+            # Label for X-axis grid lines (at the left of the canvas)
+            self.canvas.create_text(10, canvas_y_pos,
+                                    text=str(i), anchor="w", fill="#888888", tags="grid_line")
 
 
     def _draw_axes(self):
         # Clear existing axes (if any)
         self.canvas.delete("axes")
 
-        # Draw Y-axis (horizontal)
+        # Get canvas coordinates for the origin (0,0)
         center_x, center_y = self._ros_to_canvas(0, 0)
+
+        # Draw Y-axis (horizontal line through center_y)
         self.canvas.create_line(0, center_y, self.canvas_width, center_y,
                                 fill="black", width=2, tags="axes")
-        self.canvas.create_text(self.canvas_width - 10, center_y - 10, text="Y", anchor="se", fill="black", tags="axes")
+        # Label for Y-axis (at the right end, centered vertically on the line)
+        self.canvas.create_text(self.canvas_width - 10, center_y, text="Y", anchor="e", fill="black", tags="axes")
 
-        # Draw X-axis (vertical)
+        # Draw X-axis (vertical line through center_x)
         self.canvas.create_line(center_x, 0, center_x, self.canvas_height,
                                 fill="black", width=2, tags="axes")
-        self.canvas.create_text(center_x + 10, 10, text="X", anchor="nw", fill="black", tags="axes")
+        # Label for X-axis (at the top end, centered horizontally on the line)
+        self.canvas.create_text(center_x, 10, text="X", anchor="n", fill="black", tags="axes")
 
         # Draw origin label
         self.canvas.create_text(center_x + 10, center_y + 10, text="(0,0)", anchor="nw", fill="black", tags="axes")
