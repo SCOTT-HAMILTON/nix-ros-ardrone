@@ -338,7 +338,7 @@ class DronePidController:
             cmd_z = self.pid_z(current_z)
 
             twist.linear.x = float(cmd_x)
-            # twist.linear.y = float(cmd_y)
+            twist.linear.y = float(cmd_y)
             twist.linear.z = float(cmd_z)
 
 
