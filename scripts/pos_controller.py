@@ -93,7 +93,7 @@ class ROSPositionGUI:
         self.y_entry.grid(row=1, column=1, padx=5, pady=5, sticky="ew")
 
         # Add the Reset button
-        reset_button = ttk.Button(input_frame, text="Reset to (0,0)", command=self._reset_position)
+        reset_button = ttk.Button(input_frame, text="Reset to odometry", command=self._reset_position)
         reset_button.grid(row=0, column=2, rowspan=2, padx=10, pady=5, sticky="nsew")
 
 
@@ -245,7 +245,7 @@ class ROSPositionGUI:
         self.x_entry.config(state='readonly')
         self.y_entry.config(state='readonly')
 
-        self.update_target(new_x, new_)
+        self.update_target(new_x, new_y)
         self._show_message("Success", f"Position reset to ({new_x:.2f}, {new_y:.2f}) and Twist message published.", "green")
 
 
