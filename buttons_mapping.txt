@@ -1,0 +1,5 @@
+L1: Takeoff
+Δ: Land
+R2: switch altitude sensor (odometry vs navdata)
+R3: reset target pos (x, y) to odometry
+

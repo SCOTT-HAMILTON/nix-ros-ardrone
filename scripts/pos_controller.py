@@ -25,8 +25,10 @@ class ROSPositionGUI:
             self.publisher = rospy.Publisher('/cmd_pos', Twist, queue_size=10)
             # Subscribe to odometry topic to get current position for reset and visualization
             self.odometry_sub = rospy.Subscriber('/ardrone/odometry', Odometry, self.odometry_callback)
+            self.joy_sub = rospy.Subscriber('/joy', Joy, self.joy_callback)
             self.odometry_x = 0.0 # Initialize odometry x
             self.odometry_y = 0.0 # Initialize odometry y
+            self.button_joy_reset_pressed = False
             rospy.loginfo("ROS node 'position_publisher_gui_node' initialized.")
             rospy.loginfo("Publisher created for topic '/cmd_pos'.")
             rospy.loginfo("Subscriber created for topic '/ardrone/odometry'.")
@@ -81,6 +83,23 @@ class ROSPositionGUI:
 
         # Schedule GUI update for odometry point on the main Tkinter thread
         self.gui_update_queue.put(('odometry_update', self.odometry_x, self.odometry_y))
+
+    def joy_callback(self, data):
+        """Handle joystick input and share with GUI."""
+        if rospy.is_shutdown():
+            rospy.loginfo("ROS is shutting down, skipping control loop.")
+            return # Exit early if ROS is shutting down
+
+        if len(data.buttons) > 2:
+            if data.buttons[2] == 1 and not self.button_joy_reset_pressed:
+                self.button_joy_reset_pressed = True
+                self._reset_position()
+                rospy.loginfo("ROS joystick button 2 RESET POS to odometry !")
+            elif data.buttons[2] == 0 and self.button_joy_reset_pressed:
+                self.button_joy_reset_pressed = False
+
+        if len(data.axes) > 2:
+            self.shared_data.target_state.z = int((data.axes[2]+1) * 1000)
 
 
     def _create_widgets(self):
