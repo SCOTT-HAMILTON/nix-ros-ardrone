@@ -3,6 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 import rospy
+from nav_msgs.msg import Odometry
 from geometry_msgs.msg import Twist
 import queue
 import threading
