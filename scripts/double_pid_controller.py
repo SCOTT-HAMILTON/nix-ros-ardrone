@@ -349,8 +349,8 @@ class DronePidController:
             twist_scaled.angular.x = float(cmd_vx)
             twist_scaled.angular.y = float(cmd_vy)
 
+            rospy.loginfo_throttle(1, f"Pos x PID: Target={target_x:.2f} mm, Current={current_x:.2f} mm, Command={float(cmd_vx):.3f}")
             rospy.loginfo_throttle(1, f"Speed vx PID: Target={target_vx:.2f} m/s, Current={current_vx:.2f} mm/s, Command={float(cmd_x):.3f}")
-            rospy.loginfo_throttle(1, f"Speed vy PID: Target={target_vy:.2f} m/s, Current={current_vy:.2f} mm/s, Command={float(cmd_y):.3f}")
             self.cmd_vel_pub.publish(twist)
             self.cmd_scaled_pub.publish(twist_scaled)
             with self.shared_data.lock:
