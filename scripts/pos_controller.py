@@ -99,10 +99,6 @@ class ROSPositionGUI:
             elif data.buttons[2] == 0 and self.button_joy_reset_pressed:
                 self.button_joy_reset_pressed = False
 
-        if len(data.axes) > 2:
-            self.shared_data.target_state.z = int((data.axes[2]+1) * 1000)
-
-
     def _create_widgets(self):
         # Input Frame
         input_frame = ttk.LabelFrame(self.master, text="Current Target Position", padding="10 10")
