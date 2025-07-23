@@ -2,3 +2,7 @@
 /drone_logs
 /calib
 result*
+*.osa
+*.bag
+*.bin
+config/ORBvoc.txt

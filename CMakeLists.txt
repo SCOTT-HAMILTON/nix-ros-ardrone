@@ -44,3 +44,13 @@ install(DIRECTORY launch/
   PATTERN "*.launch"
   PATTERN ".git" EXCLUDE
 )
+
+
+install(DIRECTORY config/
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/config
+  PATTERN "*.yaml"
+  PATTERN "*.txt"
+  PATTERN "*.bin"
+  PATTERN "*.rviz"
+  PATTERN ".git" EXCLUDE
+)

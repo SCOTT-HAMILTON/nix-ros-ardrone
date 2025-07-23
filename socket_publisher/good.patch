@@ -1,0 +1,26 @@
+diff --git a/include/socket_publisher/data_serializer.h b/include/socket_publisher/data_serializer.h
+index 0a9c0c1..93e1ecd 100644
+--- a/include/socket_publisher/data_serializer.h
++++ b/include/socket_publisher/data_serializer.h
+@@ -6,7 +6,7 @@
+ #include <memory>
+ 
+ #include <Eigen/Core>
+-#include <sioclient/sio_client.h>
++#include <sio_client.h>
+ 
+ namespace stella_vslam {
+ 
+diff --git a/include/socket_publisher/socket_client.h b/include/socket_publisher/socket_client.h
+index 0429387..092a608 100644
+--- a/include/socket_publisher/socket_client.h
++++ b/include/socket_publisher/socket_client.h
+@@ -3,7 +3,7 @@
+ 
+ #include "stella_vslam/config.h"
+ 
+-#include <sioclient/sio_client.h>
++#include <sio_client.h>
+ 
+ namespace stella_vslam {
+ class config;

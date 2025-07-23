@@ -13,4 +13,9 @@
     <arg name="port" value="8765" />
   </include>
 
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find orb_slam3_ros)/config/orb_slam3_with_imu.rviz" output="screen">
+        <remap from="/cam0/image_raw"     to="/ardrone/front/image_raw"/>
+        <remap from="/imu"                  to="/ardrone/imu"/>
+  </node>
+
 </launch>

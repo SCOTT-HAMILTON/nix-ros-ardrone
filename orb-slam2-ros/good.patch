@@ -1,0 +1,22 @@
+diff --git a/orb_slam2/src/Tracking.cc b/orb_slam2/src/Tracking.cc
+index 0fe9c71..9522404 100755
+--- a/orb_slam2/src/Tracking.cc
++++ b/orb_slam2/src/Tracking.cc
+@@ -662,7 +662,7 @@ void Tracking::CreateInitialMapMonocular()
+     pKFcur->UpdateConnections();
+ 
+     // Bundle Adjustment
+-    cout << "New Map created with " << mpMap->MapPointsInMap() << " points" << endl;
++    cout << "New Map created with " << mpMap->MapPointsInMap() << " points and " << pKFcur->TrackedMapPoints(1) << " tracked." << endl;
+ 
+     Optimizer::GlobalBundleAdjustemnt(mpMap,20);
+ 
+@@ -670,7 +670,7 @@ void Tracking::CreateInitialMapMonocular()
+     float medianDepth = pKFini->ComputeSceneMedianDepth(2);
+     float invMedianDepth = 1.0f/medianDepth;
+ 
+-    if(medianDepth<0 || pKFcur->TrackedMapPoints(1)<100)
++    if(medianDepth<0 || pKFcur->TrackedMapPoints(1)<70)
+     {
+         cout << "Wrong initialization, reseting..." << endl;
+         Reset();

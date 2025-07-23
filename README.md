@@ -67,3 +67,20 @@ $ rosrun camera_calibration cameracalibrator.py --pattern=chessboard --square=0.
 ```shell_session
 $ roslaunch nix_ros_ardrone ardrone_setup.launch
 ```
+
+## Run ORB-SLAM2 Mapping
+To start the mapping
+```shell_session
+$ roslaunch nix_ros_ardrone orb_slam2_ardrone_map.launch
+```
+And to save the current map to a file (here /home/scott/GIT/nix-ros-ardrone/mono_map.bin)
+```shell_session
+$ rosservice call /orb_slam2_mono/save_map "/home/scott/GIT/nix-ros-ardrone/mono_map.bin"
+```
+
+## Run ORB-SLAM2 Localization
+```shell_session
+$ roslaunch nix_ros_ardrone orb_slam2_ardrone_localize.launch
+```
+
+The Pose object is published to /orb_slam2_mono/pose
