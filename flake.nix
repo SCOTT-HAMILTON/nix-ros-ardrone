@@ -31,6 +31,11 @@
       inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";
     };
 
+    orb-slam3-ros-flake = {
+      url = "git+file:/home/scott/GIT/thien94/orb_slam3_ros";
+      inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";
+    };
+
     # nix-gl-flake = {
     #   url = "github:nix-community/nixGL";
     #   inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";
@@ -41,7 +46,7 @@
       # inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";
     # };
   };
-  outputs = { self, flake-utils, nix-ros-overlay, nixpkgs, ardrone-autonomy-flake, camera-calibration-flake, ros-foxglove-bridge-flake }:
+  outputs = { self, flake-utils, nix-ros-overlay, nixpkgs, ardrone-autonomy-flake, camera-calibration-flake, ros-foxglove-bridge-flake, orb-slam3-ros-flake }:
     nix-ros-overlay.inputs.flake-utils.lib.eachDefaultSystem (system:
       let
         # The overlay logic from your first snippet
@@ -53,24 +58,27 @@
 
         rosDistroOverlays = final: prev: {
           rosPackages = applyDistroOverlay (rosFinal: rosPrev: rec {
-            cv-bridge = rosPrev.cv-bridge.overrideAttrs (old: {
-              buildInputs = (old.buildInputs or []) ++ [ final.opencv4 ];
-            });
+            image-transport = rosFinal.callPackage ./image-transport/package.nix {};
+            # cv-bridge = rosPrev.cv-bridge.overrideAttrs (old: {
+            #   buildInputs = (old.buildInputs or []) ++ [ final.opencv4 ];
+            # });
             ardrone-autonomy = ardrone-autonomy-flake.packages.${system}.default;
             mycamera-calibration = camera-calibration-flake.packages.${system}.default.overrideAttrs (
               old: {
-                propagatedBuildInputs =
-                  builtins.filter (pkg: (pkg.pname or "") != "ros-noetic-cv-bridge") (old.propagatedBuildInputs or [])
-                  ++ [ cv-bridge ];
+                # propagatedBuildInputs =
+                #   builtins.filter (pkg: (pkg.pname or "") != "ros-noetic-cv-bridge") (old.propagatedBuildInputs or [])
+                #   ++ [ cv-bridge ];
               }
             );
-            rqt-image-view = rosPrev.rqt-image-view.overrideAttrs (old: {
-              buildInputs = pkgs.lib.traceValFn (x: builtins.concatStringsSep ", " (map (pkg: pkg.pname or "NO_PNAME") x)) ((builtins.filter (pkg: (pkg.pname or "") != "ros-noetic-cv-bridge") (old.buildInputs or [])) ++ [ cv-bridge ]);
-            });
+            # rqt-image-view = rosPrev.rqt-image-view.overrideAttrs (old: {
+            #   buildInputs = pkgs.lib.traceValFn (x: builtins.concatStringsSep ", " (map (pkg: pkg.pname or "NO_PNAME") x)) ((builtins.filter (pkg: (pkg.pname or "") != "ros-noetic-cv-bridge") (old.buildInputs or [])) ++ [ cv-bridge ]);
+            # });
 
             ros-foxglove-bridge = ros-foxglove-bridge-flake.packages.${system}.default;
 
             nix-ros-ardrone = rosFinal.callPackage ./package.nix {};
+
+            orb-slam3-ros = orb-slam3-ros-flake.packages.${system}.default;
           }) prev.rosPackages;
         };
         
@@ -80,17 +88,10 @@
 
         pkgs = import nixpkgs {
           inherit system;
-          overlays = [  nix-ros-overlay.overlays.default rosDistroOverlays opencvOverlay ];
-        };
-
-        rosEnv = with pkgs.rosPackages.noetic; pkgs.buildEnv {
-          name = "ros-env";
-          paths = [
-            ros-core ardrone-autonomy rospy rviz
-            plotjuggler plotjuggler-msgs plotjuggler-ros
-            teleop-twist-joy rqt-image-view mycamera-calibration
-            ros-foxglove-bridge
-            nix-ros-ardrone
+          overlays = [
+            nix-ros-overlay.overlays.default
+            rosDistroOverlays
+            # opencvOverlay
           ];
         };
 
@@ -135,21 +136,28 @@
             (with pkgs.rosPackages.noetic; buildEnv {
               paths = [
                 ros-core
+                rviz # REQUIRES UNFREE freeimage package
                 ardrone-autonomy
                 rospy
-                # rviz # REQUIRES UNFREE freeimage package
                 plotjuggler
                 plotjuggler-msgs
                 plotjuggler-ros
                 teleop-twist-joy
-                rqt-image-view
-                mycamera-calibration
+
+                # rqt-image-view
+                # mycamera-calibration
+                # rqt-reconfigure
+
                 ros-foxglove-bridge
                 nix-ros-ardrone
                 dynamic-reconfigure
                 control-toolbox
-                rqt-reconfigure
+                orb-slam3-ros
+                hector-trajectory-server
                 # ... other ROS packages
+
+                ## ROS Packages for running orb-slam3
+                roscpp  tf  sensor-msgs  image-transport
               ];
             })
             (pkgs.runCommand "mypython-wrapper" {
@@ -162,19 +170,6 @@
         };
 
         packages.default = pkgs.rosPackages.noetic.nix-ros-ardrone;
-
-        apps.default = flake-utils.lib.mkApp {
-          drv = pkgs.writeShellApplication {
-            name = "ros-launcher";
-            # runtimeInputs = allPackages;
-            text = ''
-              #!${pkgs.lib.traceValFn (x: "${x}") rosEnv}/bin/bash
-              set -e
-              ${pkgs.chromium}/bin/chromium https://app.foxglove.dev &
-              roslaunch nix_ros_ardrone ardrone_setup.launch
-            '';
-          };
-        };
       });
   nixConfig = {
     extra-substituters = [ "https://ros.cachix.org" ];
