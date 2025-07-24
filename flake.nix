@@ -4,7 +4,7 @@
     nix-ros-overlay.url = "github:lopsided98/nix-ros-overlay/master";
 
     nixpkgs.follows = "nix-ros-overlay/nixpkgs";  # IMPORTANT!!!
-    # nixpkgs-system.url = "github:NixOS/nixpkgs/25.05";
+    nixpkgs-system.url = "github:NixOS/nixpkgs/25.05";
     flake-utils.url = "github:numtide/flake-utils";
 
     ardrone-autonomy-flake = {
@@ -32,7 +32,8 @@
     };
 
     orb-slam3-ros-flake = {
-      url = "git+file:/home/scott/GIT/thien94/orb_slam3_ros";
+      # url = "git+file:/home/scott/GIT/thien94/orb_slam3_ros";
+      url = "github:SCOTT-HAMILTON/orb_slam3_ros";
       inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";
     };
 
@@ -46,7 +47,7 @@
       # inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";
     # };
   };
-  outputs = { self, flake-utils, nix-ros-overlay, nixpkgs, ardrone-autonomy-flake, camera-calibration-flake, ros-foxglove-bridge-flake, orb-slam3-ros-flake }:
+  outputs = { self, flake-utils, nix-ros-overlay, nixpkgs, ardrone-autonomy-flake, camera-calibration-flake, ros-foxglove-bridge-flake, orb-slam3-ros-flake, nixpkgs-system }:
     nix-ros-overlay.inputs.flake-utils.lib.eachDefaultSystem (system:
       let
         # The overlay logic from your first snippet
@@ -58,11 +59,14 @@
 
         rosDistroOverlays = final: prev: {
           rosPackages = applyDistroOverlay (rosFinal: rosPrev: rec {
-            image-transport = rosFinal.callPackage ./image-transport/package.nix {};
+            # image-transport = prev.lib.traceValFn (x: "patched-image-transport=${x}") (rosFinal.callPackage ./image-transport/package.nix {});
             # cv-bridge = rosPrev.cv-bridge.overrideAttrs (old: {
             #   buildInputs = (old.buildInputs or []) ++ [ final.opencv4 ];
             # });
             ardrone-autonomy = ardrone-autonomy-flake.packages.${system}.default;
+              # propagatedBuildInputs = prev.lib.traceValFn (x: builtins.concatStringsSep ", " (map (y: y.pname or "NO_PNAME") x) )
+              #   (map (x: if x.pname == "ros-noetic-image-transport" then image-transport else x) old.propagatedBuildInputs);
+            # });
             mycamera-calibration = camera-calibration-flake.packages.${system}.default.overrideAttrs (
               old: {
                 # propagatedBuildInputs =
@@ -95,6 +99,8 @@
           ];
         };
 
+        pkgsSystem = import nixpkgs-system {};
+
         mypython = (pkgs.python3.override {
           # Careful, we're using a different final and prev here!
           packageOverrides = final: prev: {
@@ -126,46 +132,55 @@
           opencv4
           simple-pid
         ]);
-      in {
-        devShells.default = pkgs.mkShell {
-          name = "Example project";
-          packages = [
-            pkgs.colcon
-            # simple-pid-flake.packages.${system}.default
-            # ... other non-ROS packages
-            (with pkgs.rosPackages.noetic; buildEnv {
+        rosEnv = (with pkgs.rosPackages.noetic; buildEnv {
               paths = [
                 ros-core
                 rviz # REQUIRES UNFREE freeimage package
-                ardrone-autonomy
                 rospy
                 plotjuggler
                 plotjuggler-msgs
                 plotjuggler-ros
                 teleop-twist-joy
-
+                ros-foxglove-bridge
+                dynamic-reconfigure
+                control-toolbox
+                hector-trajectory-server
+                
+                ## cv_bridge collision
                 # rqt-image-view
                 # mycamera-calibration
                 # rqt-reconfigure
 
-                ros-foxglove-bridge
+                ## image_transport collision
                 nix-ros-ardrone
-                dynamic-reconfigure
-                control-toolbox
                 orb-slam3-ros
-                hector-trajectory-server
-                # ... other ROS packages
+                ardrone-autonomy
 
                 ## ROS Packages for running orb-slam3
-                roscpp  tf  sensor-msgs  image-transport
+                roscpp
+                tf
+                sensor-msgs
+                (lib.traceValFn (x: "rosEnv direct image-transport = ${x}") image-transport)
               ];
-            })
+            });
+      in {
+        devShells.default = pkgs.mkShell {
+          name = "Example project";
+          shellHook = ''
+            export ROS_PACKAGE_PATH="${rosEnv}/share"; # Required for ROS's pluginlib to find plugins
+          '';
+          packages = [
+            pkgs.colcon
+            # simple-pid-flake.packages.${system}.default
+            # ... other non-ROS packages
+            rosEnv 
             (pkgs.runCommand "mypython-wrapper" {
               nativeBuildInputs = [ pkgs.makeWrapper ];
             } ''
               mkdir -p $out/bin
               makeWrapper ${mypython}/bin/python $out/bin/mypython
             '')
+            pkgsSystem.gvfs
           ];
         };
 
