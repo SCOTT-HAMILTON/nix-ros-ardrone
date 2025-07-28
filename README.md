@@ -84,3 +84,5 @@ $ roslaunch nix_ros_ardrone orb_slam2_ardrone_localize.launch
 ```
 
 The Pose object is published to /orb_slam2_mono/pose
+
+https://github.com/cra-ros-pkg/robot_localization/blob/rolling-devel/params/ekf.yaml

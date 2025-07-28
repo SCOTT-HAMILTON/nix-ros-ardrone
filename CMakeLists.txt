@@ -38,6 +38,9 @@ install(PROGRAMS scripts/pos_controller.py
 install(PROGRAMS scripts/launch_chromium_foxglove.sh
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
+install(PROGRAMS scripts/altitude_to_pose.py
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+)
 
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch

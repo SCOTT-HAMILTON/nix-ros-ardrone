@@ -1,0 +1,12 @@
+<launch>
+  <!-- EKF Localization Node -->
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization" clear_params="true" output="screen">
+    <!-- Load parameters from YAML config file -->
+    <rosparam command="load" file="$(find nix_ros_ardrone)/config/ekf_ardrone.yaml"/>
+    
+    <!-- Remap topics if needed (example) -->
+    <!-- <remap from="odometry/filtered" to="odom/filtered"/> -->
+    <!-- <remap from="imu/data" to="ardrone/imu"/> -->
+  </node>
+  <node pkg="nix_ros_ardrone" type="altitude_to_pose.py" name="ardrone_altitude_to_pose" output="screen" />
+</launch>

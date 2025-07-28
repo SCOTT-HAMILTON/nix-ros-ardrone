@@ -19,11 +19,11 @@
       };
     };
 
-    camera-calibration-flake = {
-      # url = "git+file:/home/scott/GIT/image_pipeline/camera_calibration";
-      url = "github:SCOTT-HAMILTON/ros_camera_calibration/master";
-      inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";  # Ensure consistent nixpkgs
-    };
+    # camera-calibration-flake = {
+    #   # url = "git+file:/home/scott/GIT/image_pipeline/camera_calibration";
+    #   url = "github:SCOTT-HAMILTON/ros_camera_calibration/master";
+    #   inputs.nixpkgs.follows = "nix-ros-overlay/nixpkgs";  # Ensure consistent nixpkgs
+    # };
 
     ros-foxglove-bridge-flake = {
       url = "github:SCOTT-HAMILTON/ros-foxglove-bridge";

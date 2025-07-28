@@ -9,13 +9,13 @@
 
   <node pkg="nix_ros_ardrone" type="ardrone_joystick_controller.py" name="ardrone_joystick_controller" output="screen" />
 
-  <include file="$(find foxglove_bridge)/launch/foxglove_bridge.launch">
-    <arg name="port" value="8765" />
-  </include>
+  <!-- <include file="$(find foxglove_bridge)/launch/foxglove_bridge.launch"> -->
+  <!--   <arg name="port" value="8765" /> -->
+  <!-- </include> -->
 
-  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find orb_slam3_ros)/config/orb_slam3_with_imu.rviz" output="screen">
-        <remap from="/cam0/image_raw"     to="/ardrone/front/image_raw"/>
-        <remap from="/imu"                  to="/ardrone/imu"/>
-  </node>
+  <!-- <node name="rviz" pkg="rviz" type="rviz" args="-d $(find orb_slam3_ros)/config/orb_slam3_with_imu.rviz" output="screen"> -->
+  <!--       <remap from="/cam0/image_raw"     to="/ardrone/front/image_raw"/> -->
+  <!--       <remap from="/imu"                  to="/ardrone/imu"/> -->
+  <!-- </node> -->
 
 </launch>

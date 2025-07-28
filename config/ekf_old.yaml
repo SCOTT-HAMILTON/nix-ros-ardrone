@@ -1,0 +1,53 @@
+ekf_filter_node:
+  frequency: 30.0  # EKF update rate in Hz
+  sensor_timeout: 0.1  # max delay in seconds before sensor data is considered stale
+  two_d_mode: false  # set true if operating strictly in 2D plane
+  publish_tf: true
+  map_frame: map
+  odom_frame: odom
+  base_link_frame: base_link
+
+  # Use pose from ORB-SLAM2
+  pose0:
+    topic: /orb_slam2_mono/pose
+    frame_id: base_link  # frame in which pose is expressed, match your ORB-SLAM2 setup
+    coord_frame: ENU  # or NED, depending on your coordinate system
+    position: true
+    orientation: true
+    # Set reasonable noise values (standard deviations squared)
+    position_covariance: [0.05, 0, 0,
+                          0, 0.05, 0,
+                          0, 0, 0.05]
+    orientation_covariance: [0.01, 0, 0,
+                             0, 0.01, 0,
+                             0, 0, 0.01]
+
+  # Use IMU data: orientation, angular velocity, and linear acceleration
+  imu0:
+    topic: /ardrone/imu
+    frame_id: imu_link
+    orientation: true
+    angular_velocity: true
+    linear_acceleration: true
+    orientation_covariance: [0.01, 0, 0,
+                             0, 0.01, 0,
+                             0, 0, 0.01]
+    angular_velocity_covariance: [0.02, 0, 0,
+                                 0, 0.02, 0,
+                                 0, 0, 0.02]
+    linear_acceleration_covariance: [0.05, 0, 0,
+                                    0, 0.05, 0,
+                                    0, 0, 0.05]
+
+  # Use altitude as filtered Z position
+  navdata_altd:
+    topic: /ardrone/navdata/altd
+    # Assuming std_msgs/Float32 representing altitude in millimeters
+    # We subscribe and treat it as a height measurement along z axis
+    queue_size: 5
+    type: Float32  # You may need a wrapper node to convert or remap this to pose or nav_msgs/Altitude type
+    position_variance: 0.1  # Set appropriate variance to reflect trust in altitude sensor
+    # Use as z position measurement
+    z: true
+
+  # Remainder of parameters can be fine-tuned: process noise, initial estimates, etc.
