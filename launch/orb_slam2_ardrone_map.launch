@@ -1,4 +1,7 @@
 <launch>
+
+  <node pkg="tf" type="static_transform_publisher" name="camera_link_broadcaster"
+          args="0 0 0 0 0 0 1 base_link camera_link " />
   <node name="orb_slam2_mono" pkg="orb_slam2_ros"
       type="orb_slam2_ros_mono" output="screen">
 
@@ -47,6 +50,4 @@
       <param name="camera_k3" type="double" value="0.0" />
   </node>
   <node name="rviz" pkg="rviz" type="rviz" args="-d $(find nix_ros_ardrone)/config/rviz_config.rviz" output="screen" />
-  <node pkg="tf" type="static_transform_publisher" name="camera_link_broadcaster"
-          args="0 0 0 0 0 0 1 base_link camera_link " />
 </launch>
