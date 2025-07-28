@@ -110,7 +110,7 @@
                 hector-trajectory-server
                 
                 ## cv_bridge collision
-                # rqt-image-view
+                rqt-image-view
                 # mycamera-calibration
                 # rqt-reconfigure
 
@@ -121,6 +121,8 @@
 
                 # stella-vslam-ros
                 orb-slam2-ros
+                robot-localization
+                image-view
               ];
             });
       in {

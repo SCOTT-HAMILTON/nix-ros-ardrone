@@ -1,10 +1,15 @@
-#!/usr/bin/env python3
+#!/usr/bin/env mypython
 
-import rospy
-from sensor_msgs.msg import Joy
+from cv_bridge import CvBridge, CvBridgeError
+from geometry_msgs.msg import Twist
+from sensor_msgs.msg import Joy, Image
 from std_msgs.msg import Empty, String
 from std_srvs.srv import Empty as EmptySrv
-from geometry_msgs.msg import Twist
+import cv2
+import datetime
+import os # Import os for path manipulation
+import rospy
+import sys
 import time
 
 class HotasXController:
@@ -19,10 +24,47 @@ class HotasXController:
             'land': 0,
             'reset': 0,
             'togglecam': 0,
+            'picture': 0,
         }
+        self.save_image = False
         rospy.Subscriber('/joy', Joy, self.callback)
+        image_topic = rospy.get_param('~image_topic', '/ardrone/front/image_raw')
+        rospy.Subscriber(image_topic, Image, self.save_image_callback)
 
         rospy.wait_for_service('/ardrone/togglecam')
+
+    def save_image_callback(self, msg):
+        if self.save_image:
+            rospy.loginfo("Received image message. Saving one frame...")
+        else:
+            return
+        bridge = CvBridge()
+        try:
+            cv_image = bridge.imgmsg_to_cv2(msg, "bgr8")
+        except CvBridgeError as e:
+            rospy.logerr(e)
+            return
+        # Get base filename and extension from parameters
+        base_filename = rospy.get_param('~base_filename', 'frame')
+        extension = rospy.get_param('~extension', 'png')
+        # Generate timestamp
+        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        # Construct the full filename with timestamp
+        # Example: frame_20250728_143844.png
+        filename = f"{base_filename}_{timestamp}.{extension}"
+        output_dir = rospy.get_param('~output_directory', '')
+        if output_dir and not os.path.exists(output_dir):
+            try:
+                os.makedirs(output_dir)
+                rospy.loginfo(f"Created output directory: {output_dir}")
+            except OSError as e:
+                rospy.logerr(f"Error creating directory {output_dir}: {e}")
+                # Fallback to current directory if directory creation fails
+                output_dir = ''
+        full_path = os.path.join(output_dir, filename)
+        cv2.imwrite(full_path, cv_image)
+        self.save_image = False
+        rospy.loginfo(f"Saved image to {full_path}")
 
     def toggle_camera(self):
         try:
@@ -59,12 +101,23 @@ class HotasXController:
         if joy.buttons[3] and current_time - self.last_trigger_times['togglecam'] > 1000:  # ST
             self.last_trigger_times['togglecam'] = current_time
             self.toggle_camera()
+        if joy.buttons[4] and current_time - self.last_trigger_times['picture'] > 1000:  # ST
+            self.last_trigger_times['picture'] = current_time
+            self.save_image = True
 
         # self.pub.publish(twist)
 
 if __name__ == '__main__':
     try:
         rospy.init_node('ardrone_joystick_controller', anonymous=True)
+
+        image_topic = rospy.get_param('~image_topic', '/ardrone/front/image_raw')
+        base_filename = rospy.get_param('~base_filename', 'frame')
+        extension = rospy.get_param('~extension', 'png')
+        output_dir = rospy.get_param('~output_directory', '/tmp/AR-Drone-Pictures')
+        rospy.loginfo(f"AR Drone params: image_topic={image_topic}, base_filename={base_filename}, extension={extension}, output_dir={output_dir}")
+
+
         controller = HotasXController()
         rospy.loginfo("ARDrone Joystick Controller node started.")
         rospy.spin()

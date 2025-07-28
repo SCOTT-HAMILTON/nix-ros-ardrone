@@ -1,0 +1,11 @@
+<launch>
+
+    <include file="$(find nix_ros_ardrone)/launch/hotasx_teleop.launch" />
+    <node pkg="nix_ros_ardrone" type="ardrone_joystick_controller.py" name="ardrone_joystick_controller" output="screen">
+        <param name="image_topic" value="/ardrone/front/image_raw" />
+        <param name="base_filename" value="ardrone_front_capture" />
+        <param name="extension" value="png" />
+        <param name="output_directory" value="/home/scott/Images/AR-Drone" />
+    </node>
+
+</launch>

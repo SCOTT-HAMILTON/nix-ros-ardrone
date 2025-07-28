@@ -5,4 +5,5 @@ result*
 *.osa
 *.bag
 *.bin
+*.png
 config/ORBvoc.txt
